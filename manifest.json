@@ -1,0 +1,21 @@
+{
+  "name": "Simulador de INSS",
+  "short_name": "INSS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "##000000",
+  "description": "Simulador de INSS - Calcule seu desconto do INSS de forma rápida e fácil",
+  "icons": [
+    {
+      "src": "inss.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "inss.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

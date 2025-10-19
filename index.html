@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="inss.png" />
+  <title>Simulador de Tempo de Contribuições INSS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: #fff;
+    }
+    input {
+      width: 95%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simulador de Tempo de Contribuições INSS</h1>
+  <div class="container">
+    <div class="controls">
+      <button id="addRow">➕ Adicionar Competência</button>
+      <button id="calcBtn">🧮 Calcular</button>
+      <button id="exportPDF">📄 Exportar PDF</button>
+    </div>
+
+    <table id="calcTable">
+      <thead>
+        <tr>
+          <th>Competência (MM/YYYY)</th>
+          <th>Remuneração (R$)</th>
+          <th>Empresa</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <footer>
+    <p>&copy; Desenvolvido por Pascoal Fernandes</p>
+  </footer>
+  
+    <h3 id="resultado" style="text-align:center; margin-top:20px; color:#333;"></h3>
+  </div>
+  <!-- ✅ Bibliotecas necessárias para PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    const tabela = document.querySelector('#calcTable tbody');
+    const resultado = document.getElementById('resultado');
+
+    document.getElementById('addRow').addEventListener('click', () => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="month" /></td>
+        <td><input type="number" placeholder="0.00" /></td>
+        <td><input type="text" placeholder="Nome da Empresa" /></td>
+        <td><button class="delBtn" style="background:#dc3545">🗑️</button></td>
+      `;
+      tabela.appendChild(tr);
+
+      tr.querySelector('.delBtn').addEventListener('click', () => tr.remove());
+    });
+
+    document.getElementById('calcBtn').addEventListener('click', () => {
+      let total = 0;
+      tabela.querySelectorAll('tr').forEach(row => {
+        const val = parseFloat(row.children[1].querySelector('input').value) || 0;
+        total += val;
+      });
+      resultado.textContent = `Total de Contribuições Simuladas: R$ ${total.toFixed(2)}`;
+    });
+
+    document.getElementById('exportPDF').addEventListener('click', () => {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.text('Simulação de Tempo de Contribuição', 14, 15);
+
+        const linhas = [];
+        tabela.querySelectorAll('tr').forEach(row => {
+          const competencia = row.children[0].querySelector('input').value || '';
+          const remuneracao = row.children[1].querySelector('input').value || '';
+          const empresa = row.children[2].querySelector('input').value || '';
+          linhas.push([competencia, remuneracao, empresa]);
+        });
+
+        doc.autoTable({
+          head: [['Competência', 'Remuneração (R$)', 'Empresa']],
+          body: linhas,
+          startY: 25,
+        });
+
+        doc.text(resultado.textContent, 14, doc.lastAutoTable.finalY + 10);
+        doc.save('Simulacao_INSS.pdf');
+      } catch (e) {
+        alert('Erro ao gerar PDF — veja Console (F12) para mais detalhes.');
+        console.error(e);
+      }
+    });
+  </script>
+
+    <script src="app.js"></script>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("Service Worker registrado."))
+        .catch((error) => console.log("Erro ao registrar Service Worker:", error));
+    }
+    </script>
+</body>
+</html>
+
+
